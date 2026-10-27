@@ -212,11 +212,11 @@ for line in "${RUN_LINES[@]}"; do
   run_parsed="$(docker_run_parse "$line")"
   run_img="$(echo "$run_parsed" | cut -f1)"
   run_port_raw="$(echo "$run_parsed" | cut -f2)"
-  run_host_port="$(echo "$run_port_raw" | grep -oE '^[0-9]+')"
-  if [[ "$run_port_raw" == *:* ]]; then
-    run_container_port="$(echo "$run_port_raw" | awk -F: '{print $NF}' | grep -oE '^[0-9]+')"
-  else
-    run_container_port="$run_host_port"
+  run_host_port=""
+  run_container_port=""
+  if [ -n "$run_port_raw" ]; then
+    run_host_port="$(docker_publish_ports "$run_port_raw" | cut -f1)"
+    run_container_port="$(docker_publish_ports "$run_port_raw" | cut -f2)"
   fi
   run_envs=()
   while IFS= read -r env; do
